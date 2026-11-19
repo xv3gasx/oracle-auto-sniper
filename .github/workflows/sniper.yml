@@ -1,0 +1,36 @@
+name: 24/7 Oracle Sniper
+
+on:
+  schedule:
+    # Hər 5 saatdan bir avtomatik olaraq yenidən başlayır
+    - cron: '0 */5 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: oracle-sniper-run
+  cancel-in-progress: true
+
+jobs:
+  snipe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run 24/7 Oracle Sniper
+        env:
+          OCI_PRIVATE_KEY_B64: ${{ secrets.OCI_PRIVATE_KEY_B64 }}
+          TENANCY_ID: ${{ secrets.TENANCY_ID }}
+          AUTH_USER_ID: ${{ secrets.AUTH_USER_ID }}
+          KEY_FINGERPRINT: ${{ secrets.KEY_FINGERPRINT }}
+          BOOT_VOLUME_ID: ${{ secrets.BOOT_VOLUME_ID }}
+          SUBNET_ID: ${{ secrets.SUBNET_ID }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: node sniper.js
